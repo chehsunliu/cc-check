@@ -1,6 +1,5 @@
 use std::error::Error;
-use std::fs::read_dir;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 pub struct Example {
     executable: PathBuf,
@@ -8,22 +7,12 @@ pub struct Example {
     output_filepath: PathBuf,
 }
 
-pub fn examples_from(
-    executable: &str,
-    input_folder: &str,
-    output_folder: &str,
-) -> Result<Vec<Example>, Box<dyn Error>> {
-    let mut examples: Vec<Example> = vec![];
-
-    for entry in read_dir(input_folder)? {
-        let entry = entry?;
-
-        examples.push(Example {
-            executable: PathBuf::from(executable),
-            input_filepath: entry.path(),
-            output_filepath: Path::new(output_folder).join(entry.file_name()),
-        });
+impl Example {
+    pub fn new(executable: PathBuf, input_filepath: PathBuf, output_filepath: PathBuf) -> Example {
+        Example {
+            executable,
+            input_filepath,
+            output_filepath,
+        }
     }
-
-    Ok(examples)
 }
