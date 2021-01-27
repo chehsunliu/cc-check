@@ -74,7 +74,7 @@ impl Task {
         }
     }
 
-    pub fn run(&self) -> Result<TaskResult, Box<dyn Error>> {
+    pub fn run(&self, timeout: &Duration) -> Result<TaskResult, Box<dyn Error>> {
         let file = File::open(self.input_filepath.as_path())?;
         let mut child = Command::new(self.executable.as_path())
             .stdin(Stdio::from(file))
@@ -83,7 +83,6 @@ impl Task {
             .spawn()?;
 
         let mut elapsed_time = Duration::new(0, 0);
-        let execution_time_limit = Duration::from_millis(800);
         let now = Instant::now();
 
         let exit_status = loop {
@@ -94,7 +93,7 @@ impl Task {
             sleep(Duration::from_millis(1));
             elapsed_time = now.elapsed();
 
-            if elapsed_time >= execution_time_limit {
+            if elapsed_time >= *timeout {
                 child.kill()?;
                 return Ok(TaskResult::TimeLimitExceeded { elapsed_time });
             }

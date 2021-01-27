@@ -13,6 +13,7 @@ pub struct Config {
     pub executable: String,
     pub input_folder: String,
     pub output_folder: String,
+    pub task_timeout: Duration,
 }
 
 fn load_tasks(
@@ -110,7 +111,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     )?;
 
     for task in tasks {
-        match task.run()? {
+        match task.run(&config.task_timeout)? {
             TaskResult::Accepted {
                 elapsed_time,
                 sub_tasks,
