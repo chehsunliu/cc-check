@@ -1,10 +1,11 @@
 mod sub_task;
 mod task;
 
-use crate::task::TaskResult;
 use std::error::Error;
 use std::fs::read_dir;
 use std::path::{Path, PathBuf};
+
+use crate::task::TaskResult;
 
 pub struct Config {
     pub executable: String,
@@ -34,6 +35,25 @@ fn load_tasks(
     Ok(tasks)
 }
 
+fn print_task_header(input_filepath: &Path, status: &str, status_color: term::color::Color) {
+    let mut t = term::stdout().unwrap();
+
+    t.fg(term::color::BLACK).unwrap();
+    t.bg(status_color).unwrap();
+    write!(t, " {} ", status).unwrap();
+    t.reset().unwrap();
+
+    let folder_path = input_filepath.parent().unwrap().to_str().unwrap();
+    let filename = input_filepath.file_name().unwrap().to_str().unwrap();
+    t.fg(term::color::BRIGHT_BLACK).unwrap();
+    write!(t, " {}/", folder_path).unwrap();
+    t.fg(term::color::WHITE).unwrap();
+    write!(t, "{}", filename).unwrap();
+    t.reset().unwrap();
+
+    writeln!(t).unwrap();
+}
+
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let tasks = load_tasks(
         config.executable.as_str(),
@@ -43,10 +63,18 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
     for task in tasks {
         match task.run()? {
-            TaskResult::Accepted { .. } => {}
-            TaskResult::WrongAnswer { .. } => {}
-            TaskResult::TimeLimitExceeded { .. } => {}
-            TaskResult::RuntimeError { .. } => {}
+            TaskResult::Accepted { .. } => {
+                print_task_header(task.input_filepath.as_path(), "PASS", term::color::GREEN);
+            }
+            TaskResult::WrongAnswer { .. } => {
+                print_task_header(task.input_filepath.as_path(), "FAIL", term::color::RED);
+            }
+            TaskResult::TimeLimitExceeded { .. } => {
+                print_task_header(task.input_filepath.as_path(), "TLE ", term::color::RED);
+            }
+            TaskResult::RuntimeError { .. } => {
+                print_task_header(task.input_filepath.as_path(), "RTE ", term::color::RED);
+            }
         }
     }
 
