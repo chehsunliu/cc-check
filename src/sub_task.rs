@@ -22,7 +22,7 @@ pub fn create_sub_tasks(actual_outputs: String, expected_outputs: String) -> Vec
             expected_outputs.push("<none>");
         }
     } else if actual_minus_expected < 0 {
-        for _ in 0..actual_minus_expected {
+        for _ in 0..(-actual_minus_expected) {
             actual_outputs.push("<none>");
         }
     }

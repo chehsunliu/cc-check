@@ -91,7 +91,7 @@ impl Task {
                 break status;
             }
 
-            sleep(Duration::from_millis(50));
+            sleep(Duration::from_millis(1));
             elapsed_time = now.elapsed();
 
             if elapsed_time >= execution_time_limit {

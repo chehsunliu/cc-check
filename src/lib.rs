@@ -5,7 +5,9 @@ use std::error::Error;
 use std::fs::read_dir;
 use std::path::{Path, PathBuf};
 
+use crate::sub_task::SubTask;
 use crate::task::TaskResult;
+use std::time::Duration;
 
 pub struct Config {
     pub executable: String,
@@ -35,7 +37,12 @@ fn load_tasks(
     Ok(tasks)
 }
 
-fn print_task_header(input_filepath: &Path, status: &str, status_color: term::color::Color) {
+fn print_task_header(
+    input_filepath: &Path,
+    status: &str,
+    status_color: term::color::Color,
+    elapsed_time: Duration,
+) {
     let mut t = term::stdout().unwrap();
 
     t.fg(term::color::BLACK).unwrap();
@@ -51,6 +58,47 @@ fn print_task_header(input_filepath: &Path, status: &str, status_color: term::co
     write!(t, "{}", filename).unwrap();
     t.reset().unwrap();
 
+    t.fg(term::color::BRIGHT_BLACK).unwrap();
+    write!(t, "   (time: {:.3}s)", elapsed_time.as_secs_f32()).unwrap();
+    t.reset().unwrap();
+
+    writeln!(t).unwrap();
+}
+
+fn print_sub_tasks(sub_tasks: Vec<SubTask>) {
+    let mut t = term::stdout().unwrap();
+    let indent = "  ";
+
+    writeln!(t).unwrap();
+
+    for (index, sub_task) in sub_tasks.iter().enumerate() {
+        write!(t, "{}", indent).unwrap();
+        if sub_task.actual_output == sub_task.expected_output {
+            t.fg(term::color::GREEN).unwrap();
+            write!(t, "\u{2713}").unwrap();
+            t.reset().unwrap();
+        } else {
+            t.fg(term::color::RED).unwrap();
+            write!(t, "\u{2717}").unwrap();
+            t.reset().unwrap();
+        }
+        write!(t, " subtask#{}\n", index + 1).unwrap();
+
+        if sub_task.actual_output != sub_task.expected_output {
+            t.fg(term::color::BRIGHT_BLACK).unwrap();
+            write!(t, "{}{}expected: ", indent, indent).unwrap();
+            t.fg(term::color::GREEN).unwrap();
+            writeln!(t, "{}", sub_task.expected_output).unwrap();
+
+            t.fg(term::color::BRIGHT_BLACK).unwrap();
+            write!(t, "{}{}received: ", indent, indent).unwrap();
+            t.fg(term::color::RED).unwrap();
+            writeln!(t, "{}", sub_task.actual_output).unwrap();
+
+            t.reset().unwrap();
+        }
+    }
+
     writeln!(t).unwrap();
 }
 
@@ -63,17 +111,45 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
     for task in tasks {
         match task.run()? {
-            TaskResult::Accepted { .. } => {
-                print_task_header(task.input_filepath.as_path(), "PASS", term::color::GREEN);
+            TaskResult::Accepted {
+                elapsed_time,
+                sub_tasks,
+            } => {
+                print_task_header(
+                    task.input_filepath.as_path(),
+                    "PASS",
+                    term::color::GREEN,
+                    elapsed_time,
+                );
+                print_sub_tasks(sub_tasks);
             }
-            TaskResult::WrongAnswer { .. } => {
-                print_task_header(task.input_filepath.as_path(), "FAIL", term::color::RED);
+            TaskResult::WrongAnswer {
+                elapsed_time,
+                sub_tasks,
+            } => {
+                print_task_header(
+                    task.input_filepath.as_path(),
+                    "FAIL",
+                    term::color::RED,
+                    elapsed_time,
+                );
+                print_sub_tasks(sub_tasks);
             }
-            TaskResult::TimeLimitExceeded { .. } => {
-                print_task_header(task.input_filepath.as_path(), "TLE ", term::color::RED);
+            TaskResult::TimeLimitExceeded { elapsed_time } => {
+                print_task_header(
+                    task.input_filepath.as_path(),
+                    "TLE ",
+                    term::color::YELLOW,
+                    elapsed_time,
+                );
             }
-            TaskResult::RuntimeError { .. } => {
-                print_task_header(task.input_filepath.as_path(), "RTE ", term::color::RED);
+            TaskResult::RuntimeError { elapsed_time } => {
+                print_task_header(
+                    task.input_filepath.as_path(),
+                    "RTE ",
+                    term::color::BRIGHT_RED,
+                    elapsed_time,
+                );
             }
         }
     }
