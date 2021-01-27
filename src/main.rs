@@ -38,7 +38,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             Arg::with_name("task-timeout")
                 .long("task-timeout")
                 .takes_value(true)
-                .value_name("SECONDS")
+                .value_name("MILLISECONDS")
                 .help(&format!(
                     "The timeout in milliseconds. [default: {}ms]",
                     default_timeout

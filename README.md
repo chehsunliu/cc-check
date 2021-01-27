@@ -9,7 +9,7 @@ Use cargo to build this command line tool:
 ```sh
 $ cargo build --release
 $ ./target/release/cc-check --help
-GG
+GG 
 
 USAGE:
     cc-check [OPTIONS] --executable <FILE> --input-folder <FOLDER> --output-folder <FOLDER>
@@ -19,10 +19,10 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -e, --executable <FILE>         The executable to run
-    -i, --input-folder <FOLDER>     The folder containing testing files
-    -o, --output-folder <FOLDER>    The folder containing expected result files
-        --task-timeout <SECONDS>    The timeout in milliseconds. [default: 3000ms]
+    -e, --executable <FILE>              The executable to run
+    -i, --input-folder <FOLDER>          The folder containing testing files
+    -o, --output-folder <FOLDER>         The folder containing expected result files
+        --task-timeout <MILLISECONDS>    The timeout in milliseconds. [default: 3000ms]
 ```
 
 Suppose your program for an algorithm problem is `a.out`. Prepare the testing data in a folder:
