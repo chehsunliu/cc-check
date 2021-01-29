@@ -45,6 +45,8 @@ Then run the binary as follows:
 $ cc-check -e ./a.out -i ./input-data -o ./expected-output-data
 ```
 
+Note that outputs from `stderr` will be shown in the other block.
+
 ## Screenshots
 
 ![example-1](/docs/example-1.png)

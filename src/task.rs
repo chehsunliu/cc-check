@@ -12,10 +12,12 @@ pub enum TaskResult {
     Accepted {
         elapsed_time: Duration,
         sub_tasks: Vec<SubTask>,
+        stderr: Option<String>,
     },
     WrongAnswer {
         elapsed_time: Duration,
         sub_tasks: Vec<SubTask>,
+        stderr: Option<String>,
     },
     TimeLimitExceeded {
         elapsed_time: Duration,
@@ -46,6 +48,14 @@ fn create_final(
     };
     let expected_outputs = read_to_string(output_filepath)?;
     let sub_tasks = create_sub_tasks(actual_outputs, expected_outputs);
+    let stderr = match child.stderr {
+        Some(mut stderr) => {
+            let mut tmp = String::new();
+            stderr.read_to_string(&mut tmp)?;
+            Some(tmp)
+        }
+        None => None,
+    };
 
     let mismatched_count = sub_tasks
         .iter()
@@ -56,11 +66,13 @@ fn create_final(
         Ok(TaskResult::Accepted {
             elapsed_time,
             sub_tasks,
+            stderr,
         })
     } else {
         Ok(TaskResult::WrongAnswer {
             elapsed_time,
             sub_tasks,
+            stderr,
         })
     }
 }

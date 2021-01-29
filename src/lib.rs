@@ -99,8 +99,24 @@ fn print_sub_tasks(sub_tasks: Vec<SubTask>) {
             t.reset().unwrap();
         }
     }
-
     writeln!(t).unwrap();
+}
+
+fn print_stderr(stderr: Option<String>) {
+    if let Some(stderr) = stderr {
+        if stderr.is_empty() {
+            return;
+        }
+
+        let mut t = term::stdout().unwrap();
+
+        writeln!(t, "    stderr:").unwrap();
+
+        t.fg(term::color::BRIGHT_BLACK).unwrap();
+        let stderr = stderr.trim().replace("\n", "\n    ");
+        writeln!(t, "{}{}\n", "    ", stderr).unwrap();
+        t.reset().unwrap();
+    }
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
@@ -115,6 +131,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
             TaskResult::Accepted {
                 elapsed_time,
                 sub_tasks,
+                stderr,
             } => {
                 print_task_header(
                     task.input_filepath.as_path(),
@@ -123,10 +140,12 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
                     elapsed_time,
                 );
                 print_sub_tasks(sub_tasks);
+                print_stderr(stderr);
             }
             TaskResult::WrongAnswer {
                 elapsed_time,
                 sub_tasks,
+                stderr,
             } => {
                 print_task_header(
                     task.input_filepath.as_path(),
@@ -135,6 +154,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
                     elapsed_time,
                 );
                 print_sub_tasks(sub_tasks);
+                print_stderr(stderr);
             }
             TaskResult::TimeLimitExceeded { elapsed_time } => {
                 print_task_header(
