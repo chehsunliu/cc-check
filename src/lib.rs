@@ -113,7 +113,7 @@ fn print_stderr(stderr: Option<String>) {
         writeln!(t, "    stderr:").unwrap();
 
         t.fg(term::color::BRIGHT_BLACK).unwrap();
-        let stderr = stderr.trim().replace("\n", "\n    ");
+        let stderr = stderr.replace("\n", "\n    ");
         writeln!(t, "{}{}\n", "    ", stderr).unwrap();
         t.reset().unwrap();
     }
